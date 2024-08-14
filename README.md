@@ -12,4 +12,4 @@ This project implements a simple singly linked list in C, allowing you to perfor
 
 <h3>Note</h3>
 - This project for educational purposes only.<br>
-- This reop was named <code>Linked gist</code> deliberately.<br>
+- This repo. was named <code>Linked gist</code> deliberately.<br>
