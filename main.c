@@ -6,51 +6,57 @@ struct Node{
     int data;
     Node *next;
 };
-Node* head = NULL;
+Node *head = NULL;
+Node *last = NULL; // always point at the end of the linked list
 int linkedListSize = 0; // IDK, if this the best practice but I'll see
 int valid_position(int pos){
     // linkedListSize+1 cus you might add something at the end using insert_th_position()
-    if(pos > linkedListSize+1 || pos <= 0) return 0;
+    // ignore the comment at line 13 #fixed in insert_th_position()
+    if(pos > linkedListSize || pos <= 0) return 0;
     return 1;
 }
-void insert_begin(int num){
+int insert_begin(int num){
     Node* new_node = malloc(sizeof(Node));
     if(new_node == NULL){
         printf("Memory is full\n");
-        return;
+        return 0;
     }
     new_node->data = num;
     new_node->next = head;
     head = new_node;
     linkedListSize++;
+    return 1;
 }
-void insert_end(int num){
+int insert_end(int num){
+    // in constant time
     Node* new_node = malloc(sizeof(Node));
+    // faild to allocate memory in the heap.
     if(new_node == NULL){
         printf("Memory is full\n");
-        return;
+        return 0;
     }
     new_node->data = num;
     new_node->next = NULL;
 
-    Node* temp = head;
-
     // if linkedList is empty
     if(head == NULL) {
         head = new_node;
+        last = new_node;
         linkedListSize++;
-        return;
+        return 1;
     }
+
     // if Not empty
-    while(temp->next != NULL){
-        temp = temp->next;
-    }
-    temp->next = new_node;
+    last->next = new_node;
+    last = new_node;
     linkedListSize++;
+    return 1;
 }
 int insert_th_position(int num, int pos){
-    // invalid position.
-    if(!valid_position(pos)) return 0;
+    if(pos == linkedListSize+1) return insert_end(num); // at the end
+    else if(pos == 1) return insert_begin(num); // at beginning
+    else if(!valid_position(pos)) return 0; // invalid position.
+    
 
     // our new node.
     Node* new_node = malloc(sizeof(Node));
@@ -90,6 +96,9 @@ int insert_th_position(int num, int pos){
     return 1;
 }
 int delete_node(int pos){
+    // if linked list is empty
+    if(!linkedListSize) return 2;
+    
     // invalid position
     if(!valid_position(pos)) return 0;
 
@@ -97,12 +106,24 @@ int delete_node(int pos){
     if(pos == 1){
         head = head->next;
         free(current);
+        current = NULL; // not to be a dangling pointer (good practice)
+        // the pointer will be deleted after function's execution anyways.
+
+        // if linked list has only one element to be deleted
+        if(linkedListSize == 1) last = head; 
         linkedListSize--;
+        
         return 1;
     }
     for(int i = 0; i < pos-2;i++){
         current = current->next;
     }
+
+    // to save the last position
+    if(pos == linkedListSize){
+        last = current;
+    }
+    
     // holds the address of the node that will be deleted.
     Node* tmp = current->next;
 
@@ -114,20 +135,25 @@ int delete_node(int pos){
     // [curret]               [node]...->NULL
     //        |_______________↑
     free(tmp);
+    tmp = NULL;// not to be a dangling pointer (good practice)
+    // the pointer will be deleted after function's execution anyways.
+    
     linkedListSize--;
     return 1;
 }
 void printLinked(){
+    printf("===> This is your linked list <===\n");
     Node *temp = head;
+    printf("head->");
+
     // if temp hasn't reached the last node yet.
     while(temp != NULL){
         printf("[%d]->", temp->data);
         temp = temp->next;
     }
-    printf("NULL\n");
+    printf("NULL\n\n");
 }
-
-__int32 main() {
+int main() {
     printf("=====Small project on linked lists=====\n");
     printf("How many numbers will you insert?\n");
     int size;
@@ -138,11 +164,11 @@ __int32 main() {
         scanf("%d", &input);
         insert_end(input);
     }
-    printf("This is your linked list\n");
     printLinked();
 
     size_t op;
     do{
+        // printf("%d\n", last->data);
         int user_input;
         int element_position;
         printf("Choose an operation.\n");
@@ -156,22 +182,25 @@ __int32 main() {
         if(op<4LL){
             printf("Enter a number:\n");
             scanf("%d",&user_input);
-            if(op == 1LL) insert_begin(user_input);
 
-            else if(op == 2LL){
-                insert_end(user_input);
-            }
-            else{
+            if(op == 1LL) insert_begin(user_input);
+            else if(op == 2LL) insert_end(user_input);
+            else
                 do{
                     printf("Enter a valid position:\n");
                     scanf("%d",&element_position);
                 }while(!insert_th_position(user_input,element_position));
-            }
+            
         }else if(op == 4LL){
-            do{
-                printf("Enter a valid position:\n");
-                scanf("%d",&element_position);
-            }while(!delete_node(element_position));
+        
+            if(linkedListSize)
+                do{
+                    printf("Enter a valid position:\n");
+                    scanf("%d",&element_position);
+                }while(!delete_node(element_position));
+            
+            else printf("\n====The linked list is empty====\n");
+        
         }else if(op == 5LL) exit(1);
         else {
             printf("Invalid\n");
