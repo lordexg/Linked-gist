@@ -24,6 +24,10 @@ int insert_begin(int num){
     new_node->data = num;
     new_node->next = head;
     head = new_node;
+    // if it's empty
+    if(!linkedListSize){
+        last = head; // pointer (last) points to the first node
+    } 
     linkedListSize++;
     return 1;
 }
